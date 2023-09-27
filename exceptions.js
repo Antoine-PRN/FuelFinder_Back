@@ -1,7 +1,7 @@
-class UsernameDuplicates extends Error {
+class EmailDuplicates extends Error {
   constructor(message) {
     super(message);
-    this.name = 'Username duplicates';
+    this.name = 'Email duplicates';
   }
 }
 
@@ -21,7 +21,7 @@ class InvalidInput extends Error {
 }
 
 module.exports = {
-  UsernameDuplicates,
+  EmailDuplicates,
   UserNotFound,
   InvalidInput
 }

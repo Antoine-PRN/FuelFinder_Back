@@ -1,21 +1,22 @@
 const bcrypt = require('bcrypt');
 const connectToDatabase = require('../../db');
-const { UsernameDuplicates } = require('../../exceptions');
+const { EmailDuplicates } = require('../../exceptions');
 const { checkInput, checkEmail } = require('../../controls');
 
-async function registerUser(username, password, email) {
+async function registerUser(password, email, firstname, lastname) {
   let connection;
 
   try {
     connection = connectToDatabase();
-    checkInput(username);
+    checkInput(firstname);
+    checkInput(lastname);
     checkEmail(email);
 
     // Check if the user already exists
-    const existingUser = await connection.query('SELECT * FROM users WHERE username = ?', [username]);
+    const existingUser = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
 
     if (existingUser.length > 0) {
-      throw new UsernameDuplicates('Username already exists');
+      throw new EmailDuplicates('User already exists');
     }
 
     // Hash the password using bcrypt
@@ -23,9 +24,9 @@ async function registerUser(username, password, email) {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Insert the user into the database
-    await connection.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword]);
+    await connection.query('INSERT INTO users (email, firstname, lastname, password) VALUES (?, ?, ?, ?)', [email, firstname, lastname, hashedPassword]);
 
-    return { username, email }; // Return the user data upon successful registration
+    return { email }; // Return the user data upon successful registration
   } catch (error) {
     throw error; // Re-throw the error for handling in the route
   } finally {
