@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { fetchCities } = require('./functions/API requests/api-gouv-communes'); // Importez la fonction depuis le fichier functions.js
+const { fetchCities } = require('./functions/API requests/api-gouv-communes'); 
 const { loginUser } = require('./functions/authentication/login');
 const { registerUser } = require('./functions/authentication/register');
 const { EmailDuplicates, InvalidInput } = require('./exceptions');
@@ -21,7 +21,7 @@ app.post('/user/login', async (req, res) => {
   try {
     const user = await loginUser(req.body.email, req.body.password);
     if (user) {
-      res.status(200).json({ message: 'Connection successful', user });
+      res.status(200).json({ message: 'Connection successful', token: user.token });
     }
   } catch (error) {
     if (error instanceof EmailDuplicates) {
@@ -57,7 +57,6 @@ app.post('/user/register', async (req, res) => {
     }
   }
 });
-
 
 // Route /cities qui utilise la fonction fetchCities
 app.get('/cities', async (req, res) => {

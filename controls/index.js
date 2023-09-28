@@ -1,4 +1,4 @@
-const { REGEX_FORBIDDEN_CHARS, EMAIL_REGEX } = require("../constants");
+const { REGEX_FORBIDDEN_CHARS, EMAIL_REGEX } = require("../utils/constants");
 const { InvalidInput } = require("../exceptions");
 
 function checkInput(...args) {
