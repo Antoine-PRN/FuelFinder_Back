@@ -25,10 +25,11 @@ async function loginUser(email, password, stayLoggedIn) {
 
     // Create a JWT
     const token = createJWT(user[0]);
+    let refresh_token = null;
 
     if (stayLoggedIn) {
       // Create a Refresh Token for the user
-      const refreshToken = createRefreshToken(user[0]);
+      refresh_token = createRefreshToken(user[0]);
 
       // Store the Refresh Token in the 'refresh_tokens' table
       const expiresInDays = 30;
@@ -37,11 +38,11 @@ async function loginUser(email, password, stayLoggedIn) {
       expirationDate.setDate(expirationDate.getDate() + expiresInDays);
       await connection.query(
         'INSERT INTO refresh_tokens (user_id, token, created_at, expires_in) VALUES (?, ?, ?, ?)',
-        [user[0].id, refreshToken, createdAt, expirationDate]
+        [user[0].id, refresh_token, createdAt, expirationDate]
       );
     }
 
-    return { token };
+    return { token, refresh_token };
   } catch (error) {
     throw error;
   }

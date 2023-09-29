@@ -29,6 +29,7 @@ function createRefreshToken(user) {
 }
 
 function getRefreshToken(token) {
+  console.log(token)
   try {
     const secret = process.env.REFRESH_SECRET;
     const verify = jwt.verify(token, secret);

@@ -22,7 +22,7 @@ app.post('/user/login', async (req, res) => {
   try {
     const user = await loginUser(req.body.email, req.body.password, req.body.stayLoggedIn);
     if (user) {
-      res.status(200).json({ message: 'Connection successful', token: user.token });
+      res.status(200).json({ message: 'Connection successful', token: user.token, refreshToken: user.refresh_token });
     }
   } catch (error) {
     if (error instanceof EmailDuplicates) {
@@ -59,17 +59,17 @@ app.post('/user/register', async (req, res) => {
   }
 });
 
-app.post('/user/refresh_token', (req, res) => {
+app.post('/user/refresh_token', async (req, res) => {
   try {
     const token = getRefreshToken(req.body.refreshToken);
-    
+    console.log(req.body)
     if (token) {
-      res.status(200).json({ message: 'Refresh token returned', token: token });
+      res.status(200).json({ token: token });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-})
+});
 
 // Route /cities qui utilise la fonction fetchCities
 app.get('/cities', async (req, res) => {
