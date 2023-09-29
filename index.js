@@ -5,6 +5,7 @@ const { fetchCities } = require('./functions/API requests/api-gouv-communes');
 const { loginUser } = require('./functions/authentication/login');
 const { registerUser } = require('./functions/authentication/register');
 const { EmailDuplicates, InvalidInput } = require('./exceptions');
+const { getRefreshToken } = require('./utils/jwt');
 
 const app = express();
 
@@ -19,7 +20,7 @@ const port = 5000;
 
 app.post('/user/login', async (req, res) => {
   try {
-    const user = await loginUser(req.body.email, req.body.password);
+    const user = await loginUser(req.body.email, req.body.password, req.body.stayLoggedIn);
     if (user) {
       res.status(200).json({ message: 'Connection successful', token: user.token });
     }
@@ -57,6 +58,18 @@ app.post('/user/register', async (req, res) => {
     }
   }
 });
+
+app.post('/user/refresh_token', (req, res) => {
+  try {
+    const token = getRefreshToken(req.body.refreshToken);
+    
+    if (token) {
+      res.status(200).json({ message: 'Refresh token returned', token: token });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+})
 
 // Route /cities qui utilise la fonction fetchCities
 app.get('/cities', async (req, res) => {
