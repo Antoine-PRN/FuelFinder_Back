@@ -1,11 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { fetchCities } = require('./functions/API requests/api-gouv-communes'); 
+const { fetchCities } = require('./functions/API requests/api-gouv-communes');
 const { loginUser } = require('./functions/authentication/login');
 const { registerUser } = require('./functions/authentication/register');
-const { EmailDuplicates, InvalidInput } = require('./exceptions');
+const { EmailDuplicates, InvalidInput, UserNotFound } = require('./exceptions');
 const { getRefreshToken } = require('./utils/jwt');
+const { getUser } = require('./functions/user');
 
 const app = express();
 
@@ -30,6 +31,9 @@ app.post('/user/login', async (req, res) => {
     }
     if (error instanceof InvalidInput) {
       res.status(400).json({ error: error.message });
+    }
+    if (error instanceof UserNotFound) {
+      res.status(404).json({ error: error.message });
     }
     else {
       res.status(500).json({ error: error.message });
@@ -70,6 +74,22 @@ app.post('/user/refresh_token', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+app.get('/user/get_user', async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const user = await getUser(token)
+
+    if (user) {
+      res.status(200).json({ user: user });
+    }
+  } catch (error) {
+    if (error instanceof UserNotFound) {
+      res.status(404).json({ message: error.message });
+    }
+    res.status(500).json({ error: error.message });
+  }
+})
 
 // Route /cities qui utilise la fonction fetchCities
 app.get('/cities', async (req, res) => {

@@ -23,8 +23,10 @@ async function registerUser(password, email, firstname, lastname) {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    const date = new Date().toLocaleDateString('fr');
+
     // Insert the user into the database
-    await connection.query('INSERT INTO users (email, firstname, lastname, password) VALUES (?, ?, ?, ?)', [email, firstname, lastname, hashedPassword]);
+    await connection.query('INSERT INTO users (email, firstname, lastname, password, account_creation) VALUES (?, ?, ?, ?, ?)', [email, firstname, lastname, hashedPassword, date]);
 
     return { email }; // Return the user data upon successful registration
   } catch (error) {

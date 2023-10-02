@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const connectToDatabase = require('../../db');
-const { UserNotFound } = require('../../exceptions');
+const { UserNotFound, InvalidPassword } = require('../../exceptions');
 const { checkInput } = require('../../controls');
 const { createJWT, createRefreshToken } = require('../../utils/jwt');
 
@@ -20,7 +20,7 @@ async function loginUser(email, password, stayLoggedIn) {
     // Check if the password is correct
     const isPasswordCorrect = await bcrypt.compare(password, user[0].password);
     if (!isPasswordCorrect) {
-      return res.status(401).json({ message: 'Invalid password' });
+      throw new InvalidPassword('Invalid password');
     }
 
     // Create a JWT

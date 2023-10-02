@@ -5,13 +5,24 @@ function createJWT(user) {
   try {
     const secret = process.env.SECRET;
     const token = jwt.sign({ id: user.id }, secret, {
-      expiresIn: '2d',
+      expiresIn: '1y',
     });
 
     return token;
   } catch (err) {
     console.error(err);
     return err;
+  }
+}
+
+function decodeJWT(token) {
+  try {
+    const secret = process.env.SECRET;
+    const decoded = jwt.decode(token, secret);
+
+    return decoded;
+  } catch (error) {
+    return error;
   }
 }
 
@@ -42,6 +53,7 @@ function getRefreshToken(token) {
 
 module.exports = {
   createJWT,
+  decodeJWT,
   createRefreshToken,
   getRefreshToken,
 };

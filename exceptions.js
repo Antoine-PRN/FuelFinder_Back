@@ -12,6 +12,13 @@ class UserNotFound extends Error {
   }
 }
 
+class InvalidPassword extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'Password does not match';
+  }
+}
+
 // Functionnal Controls Errors
 class InvalidInput extends Error {
   constructor(message) {
@@ -23,5 +30,6 @@ class InvalidInput extends Error {
 module.exports = {
   EmailDuplicates,
   UserNotFound,
+  InvalidPassword,
   InvalidInput
 }
