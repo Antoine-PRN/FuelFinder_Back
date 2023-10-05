@@ -1,9 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+require('dotenv').config();
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session');
 const { fetchCities } = require('./functions/API requests/api-gouv-communes');
 const { loginUser } = require('./functions/authentication/login');
-const { registerUser } = require('./functions/authentication/register');
+const { registerUser, registerGoogleUser } = require('./functions/authentication/register');
 const { EmailDuplicates, InvalidInput, UserNotFound } = require('./exceptions');
 const { getRefreshToken } = require('./utils/jwt');
 const { getUser } = require('./functions/user');
@@ -18,6 +22,85 @@ app.use(bodyParser.urlencoded({
 app.use(cors());
 
 const port = 5000;
+
+// Google connection
+// Configurez la session pour stocker les informations d'authentification
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: process.env.CALLBACK_URL,
+},
+  (accessToken, refreshToken, profile, done) => {
+    // Ici, vous pouvez gérer les informations du profil utilisateur
+    return done(null, profile);
+  }));
+
+// Serialize/deserialize l'utilisateur pour stocker dans la session
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((obj, done) => {
+  done(null, obj);
+});
+
+// Point de terminaison pour l'authentification OAuth2
+app.get('/auth/google',
+  passport.authenticate('google', {
+    scope: [
+      'https://www.googleapis.com/auth/plus.login',
+      'https://www.googleapis.com/auth/userinfo.email'
+    ]
+  })
+);
+
+// Point de terminaison de rappel OAuth2
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/google/data');
+  }
+);
+
+// Point de terminaison de déconnexion
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
+});
+
+// Vous pouvez maintenant protéger vos routes avec `ensureAuthenticated`
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/auth/google');
+}
+
+// Exemple de route protégée par l'authentification
+app.get('/google/data', ensureAuthenticated, async (req, res) => {
+  
+  try {
+    const user = await registerGoogleUser(req.user);
+
+    if (user) {
+      res.status(201).json({ message: 'Account connected successfully', user });
+    } else {
+      res.status(500).json({ message: 'Account connection failed' });
+    }
+  } catch (error) {
+    if (error instanceof EmailDuplicates) {
+      res.status(409).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// ***** //
 
 app.post('/user/login', async (req, res) => {
   try {
@@ -100,6 +183,7 @@ app.get('/cities', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Le serveur est en cours d'exécution sur le port ${port}`);

@@ -38,6 +38,31 @@ async function registerUser(password, email, firstname, lastname) {
   }
 }
 
+async function registerGoogleUser(user) {
+  let connection
+  try {
+    connection = connectToDatabase();
+
+    const existingUser = await connection.query('SELECT * FROM users WHERE email = ?', [user.emails[0].value]);
+    if (existingUser.length > 0) {
+      throw new EmailDuplicates('User already exists');
+    }
+
+    const date = new Date().toLocaleDateString('fr');
+    // Insert user's data
+    await connection.query('INSERT INTO users (email, firstname, lastname, account_creation) VALUES (?, ?, ?, ?)', [user.emails[0].value, user.name.givenName, user.name.familyName, date]);
+
+    return { user }
+  } catch (error) {
+    throw error;
+  } finally {
+    if (connection) {
+      connection.end();
+    }
+  }
+}
+
 module.exports = {
-  registerUser
+  registerUser,
+  registerGoogleUser
 };
