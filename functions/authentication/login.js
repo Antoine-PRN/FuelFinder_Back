@@ -24,7 +24,7 @@ async function loginUser(email, password, stayLoggedIn) {
     }
 
     // Create a JWT
-    const token = createJWT(user[0]);
+    const token = createJWT(user[0].id);
     let refresh_token = null;
 
     if (stayLoggedIn) {

@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const connectToDatabase = require('../../db');
 const { EmailDuplicates } = require('../../exceptions');
 const { checkInput, checkEmail } = require('../../controls');
+const { createJWT } = require('../../utils/jwt');
 
 async function registerUser(password, email, firstname, lastname) {
   let connection;
@@ -43,16 +44,16 @@ async function registerGoogleUser(user) {
   try {
     connection = connectToDatabase();
 
-    const existingUser = await connection.query('SELECT * FROM users WHERE email = ?', [user.emails[0].value]);
+    const existingUser = await connection.query('SELECT * FROM users WHERE email = ?', [user.email]);
     if (existingUser.length > 0) {
       throw new EmailDuplicates('User already exists');
     }
 
     const date = new Date().toLocaleDateString('fr');
     // Insert user's data
-    await connection.query('INSERT INTO users (email, firstname, lastname, account_creation) VALUES (?, ?, ?, ?)', [user.emails[0].value, user.name.givenName, user.name.familyName, date]);
-
-    return { user }
+    const result = await connection.query('INSERT INTO users (email, firstname, lastname, account_creation) VALUES (?, ?, ?, ?)', [user.email, user.given_name, user.family_name, date]);
+    const token = createJWT(Number(result.insertId))
+    return { token }
   } catch (error) {
     throw error;
   } finally {

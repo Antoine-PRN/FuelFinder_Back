@@ -95,6 +95,24 @@ app.get('/user/get_user', async (req, res) => {
   }
 })
 
+app.post('/google/register', async (req, res) => {
+  try {
+    const user = await registerGoogleUser(req.body.user);
+    if (user) {
+      res.status(201).json({ message: 'Account registered successfully', token: user.token })
+    } else {
+      res.status(500).json({ error: 'User registration failed' });
+    }
+  } catch (error) {
+    if (error instanceof EmailDuplicates) {
+      res.status(409).json({ error: error.message });
+    }
+    else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+})
+
 // Route /cities qui utilise la fonction fetchCities
 app.get('/cities', async (req, res) => {
   try {
