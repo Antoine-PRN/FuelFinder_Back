@@ -26,6 +26,7 @@ async function loginUser(email, password, stayLoggedIn) {
     // Create a JWT
     const token = createJWT(user[0].id);
     let refresh_token = null;
+    const premium = user[0].premium
 
     if (stayLoggedIn) {
       // Create a Refresh Token for the user
@@ -42,7 +43,7 @@ async function loginUser(email, password, stayLoggedIn) {
       );
     }
 
-    return { token, refresh_token };
+    return { token, refresh_token, premium };
   } catch (error) {
     throw error;
   }

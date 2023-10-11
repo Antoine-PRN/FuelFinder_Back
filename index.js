@@ -21,13 +21,11 @@ app.use(bodyParser.urlencoded({
 
 app.use(cors());
 
-const port = 5000;
-
 app.post('/user/login', async (req, res) => {
   try {
     const user = await loginUser(req.body.email, req.body.password, req.body.stayLoggedIn);
     if (user) {
-      res.status(200).json({ message: 'Connection successful', token: user.token, refreshToken: user.refresh_token });
+      res.status(200).json({ message: 'Connection successful', token: user.token, refreshToken: user.refresh_token, premium: user.premium });
     }
   } catch (error) {
     if (error instanceof EmailDuplicates) {
@@ -124,6 +122,6 @@ app.get('/cities', async (req, res) => {
 });
 
 
-app.listen(port, () => {
-  console.log(`Le serveur est en cours d'exécution sur le port ${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Le serveur est en cours d'exécution sur le port ${process.env.PORT}`);
 });

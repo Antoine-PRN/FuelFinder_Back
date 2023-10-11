@@ -7,7 +7,7 @@ function createJWT(id) {
     const token = jwt.sign({ id: id }, secret, {
       expiresIn: '1y',
     });
-
+    
     return token;
   } catch (err) {
     console.error(err);
