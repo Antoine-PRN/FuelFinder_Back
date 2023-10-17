@@ -46,7 +46,8 @@ async function registerGoogleUser(user) {
 
     const existingUser = await connection.query('SELECT * FROM users WHERE email = ?', [user.email]);
     if (existingUser.length > 0) {
-      throw new EmailDuplicates('User already exists');
+      const token = createJWT(Number(existingUser[0].id));
+      return { token }
     }
 
     const date = new Date().toLocaleDateString('fr');

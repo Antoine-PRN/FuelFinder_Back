@@ -20,6 +20,9 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(cors());
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2023-08-16'
+});
 
 app.post('/user/login', async (req, res) => {
   try {
@@ -120,6 +123,30 @@ app.get('/cities', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Stripe 
+app.get('/config', (req, res) => {
+  res.send({
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+  })
+})
+
+app.post('/create-payment-intent', async (req, res) => {
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      currency: 'eur',
+      amount: 399,
+      automatic_payment_methods: {
+        enabled: true,
+      }
+    });
+
+    res.send({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
 
 
 app.listen(process.env.PORT, () => {
