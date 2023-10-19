@@ -4,7 +4,7 @@ const { UserNotFound, InvalidPassword } = require('../../exceptions');
 const { checkInput } = require('../../controls');
 const { createJWT, createRefreshToken } = require('../../utils/jwt');
 
-async function loginUser(email, password, stayLoggedIn) {
+async function loginUser(email, password) {
   let connection;
 
   try {
@@ -28,20 +28,19 @@ async function loginUser(email, password, stayLoggedIn) {
     let refresh_token = null;
     const premium = user[0].premium
 
-    if (stayLoggedIn) {
-      // Create a Refresh Token for the user
-      refresh_token = createRefreshToken(user[0]);
+    // Create a Refresh Token for the user
+    refresh_token = createRefreshToken(user[0]);
 
-      // Store the Refresh Token in the 'refresh_tokens' table
-      const expiresInDays = 30;
-      const createdAt = new Date(); // Date de création actuelle
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + expiresInDays);
-      await connection.query(
-        'INSERT INTO refresh_tokens (user_id, token, created_at, expires_in) VALUES (?, ?, ?, ?)',
-        [user[0].id, refresh_token, createdAt, expirationDate]
-      );
-    }
+    // Store the Refresh Token in the 'refresh_tokens' table
+    const expiresInDays = 30;
+    const createdAt = new Date(); // Date de création actuelle
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + expiresInDays);
+    await connection.query(
+      'INSERT INTO refresh_tokens (user_id, token, created_at, expires_in) VALUES (?, ?, ?, ?)',
+      [user[0].id, refresh_token, createdAt, expirationDate]
+    );
+
 
     return { token, refresh_token, premium };
   } catch (error) {

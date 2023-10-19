@@ -1,5 +1,5 @@
 const { REGEX_FORBIDDEN_CHARS, EMAIL_REGEX } = require("../utils/constants");
-const { InvalidInput } = require("../exceptions");
+const { InvalidInput, InvalidEmail } = require("../exceptions");
 
 function checkInput(...args) {
   for (const inputProvided of args) {
@@ -13,7 +13,7 @@ function checkInput(...args) {
 function checkEmail(...args) {
   for (const inputProvided of args) {
     if (!EMAIL_REGEX.test(inputProvided)) { 
-      throw new InvalidInput('Invalid Email');
+      throw new InvalidEmail('Invalid Email');
     }
   }
 }

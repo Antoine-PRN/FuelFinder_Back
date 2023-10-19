@@ -8,7 +8,7 @@ const session = require('express-session');
 const { fetchCities } = require('./functions/API requests/api-gouv-communes');
 const { loginUser } = require('./functions/authentication/login');
 const { registerUser, registerGoogleUser } = require('./functions/authentication/register');
-const { EmailDuplicates, InvalidInput, UserNotFound } = require('./exceptions');
+const { EmailDuplicates, InvalidInput, UserNotFound, InvalidEmail } = require('./exceptions');
 const { getRefreshToken } = require('./utils/jwt');
 const { getUser } = require('./functions/user');
 
@@ -26,7 +26,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
 
 app.post('/user/login', async (req, res) => {
   try {
-    const user = await loginUser(req.body.email, req.body.password, req.body.stayLoggedIn);
+    const user = await loginUser(req.body.email, req.body.password);
     if (user) {
       res.status(200).json({ message: 'Connection successful', token: user.token, refreshToken: user.refresh_token, premium: user.premium });
     }
@@ -60,6 +60,9 @@ app.post('/user/register', async (req, res) => {
       res.status(409).json({ error: error.message });
     }
     if (error instanceof InvalidInput) {
+      res.status(400).json({ error: error.message });
+    }
+    if (error instanceof InvalidEmail) {
       res.status(400).json({ error: error.message });
     }
     else {

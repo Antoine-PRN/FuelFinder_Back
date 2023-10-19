@@ -27,9 +27,17 @@ class InvalidInput extends Error {
   }
 }
 
+class InvalidEmail extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'Invalid email';
+  }
+}
+
 module.exports = {
   EmailDuplicates,
   UserNotFound,
   InvalidPassword,
-  InvalidInput
+  InvalidInput,
+  InvalidEmail
 }
