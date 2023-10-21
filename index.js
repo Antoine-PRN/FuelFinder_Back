@@ -8,9 +8,10 @@ const session = require('express-session');
 const { fetchCities } = require('./functions/API requests/api-gouv-communes');
 const { loginUser } = require('./functions/authentication/login');
 const { registerUser, registerGoogleUser } = require('./functions/authentication/register');
-const { EmailDuplicates, InvalidInput, UserNotFound, InvalidEmail } = require('./exceptions');
+const { EmailDuplicates, InvalidInput, UserNotFound, InvalidEmail, InvalidPassword } = require('./exceptions');
 const { getRefreshToken } = require('./utils/jwt');
 const { getUser } = require('./functions/user');
+const { updateEmail, updatePassword } = require('./functions/user/updates');
 
 const app = express();
 
@@ -58,14 +59,47 @@ app.post('/user/register', async (req, res) => {
   } catch (error) {
     if (error instanceof EmailDuplicates) {
       res.status(409).json({ error: error.message });
-    }
-    if (error instanceof InvalidInput) {
+    } else if (error instanceof InvalidInput || error instanceof InvalidEmail) {
       res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: error.message });
     }
-    if (error instanceof InvalidEmail) {
+  }
+
+});
+
+app.post('/user/update_email', async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    user = updateEmail(token, req.body.newEmail, req.body.previousEmail);
+    if (user) {
+      res.status(200).json({ message: 'Email update successfully', user });
+    } else {
+      res.status(500).json({ error: 'Email update failed' });
+    }
+  } catch (error) {
+    console.log(error instanceof EmailDuplicates)
+    if (error instanceof EmailDuplicates) {
+      res.status(409).json({ error: error.message });
+    } if (error instanceof InvalidEmail) {
       res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: error.message });
     }
-    else {
+  }
+});
+
+app.post('/user/update_password', async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    user = updatePassword(token, req.body.oldPassword, req.body.newPassword, req.body.newPassword2);
+  } catch (error) {
+    if (error instanceof UserNotFound) {
+      res.status(404).json({ error: error.message });
+    }
+    if (error instanceof InvalidPassword) {
+      res.status(400).json({ error: error.message });
+    } else {
       res.status(500).json({ error: error.message });
     }
   }
