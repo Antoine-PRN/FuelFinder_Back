@@ -186,6 +186,6 @@ app.post('/create-payment-intent', async (req, res) => {
 
 
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT|| 5000, () => {
   console.log(`Le serveur est en cours d'exécution sur le port ${process.env.PORT}`);
 });
