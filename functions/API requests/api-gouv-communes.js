@@ -7,7 +7,7 @@ async function fetchCities () {
     const cities = [...new Set(response.data.map(city => city.nom))];
     return cities
   } catch (error) {
-    throw new Error('Une erreur s\'est produite lors de la récupération des données');
+    throw new Error('Une erreur s\'est produite lors de la récupération des données de villes');
   }
 }
 

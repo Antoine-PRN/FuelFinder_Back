@@ -12,6 +12,7 @@ const { EmailDuplicates, InvalidInput, UserNotFound, InvalidEmail, InvalidPasswo
 const { getRefreshToken } = require('./utils/jwt');
 const { getUser } = require('./functions/user');
 const { updateEmail, updatePassword } = require('./functions/user/updates');
+const { fetchFuels } = require('./functions/API requests/fuels');
 
 const app = express();
 
@@ -25,7 +26,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2023-08-16'
 });
 
-app.post('/user/login', async (req, res) => {
+// AUTHENTICATION
+app.post('rest/user/login', async (req, res) => {
   try {
     const user = await loginUser(req.body.email, req.body.password);
     if (user) {
@@ -47,7 +49,7 @@ app.post('/user/login', async (req, res) => {
   }
 });
 
-app.post('/user/register', async (req, res) => {
+app.post('rest/user/register', async (req, res) => {
   try {
     const user = await registerUser(req.body.password, req.body.email, req.body.firstname, req.body.lastname);
 
@@ -68,7 +70,8 @@ app.post('/user/register', async (req, res) => {
 
 });
 
-app.post('/user/update_email', async (req, res) => {
+// USERS
+app.post('rest/user/update_email', async (req, res) => {
   try {
     const token = req.headers.authorization;
     user = updateEmail(token, req.body.newEmail, req.body.previousEmail);
@@ -89,7 +92,7 @@ app.post('/user/update_email', async (req, res) => {
   }
 });
 
-app.post('/user/update_password', async (req, res) => {
+app.post('rest/user/update_password', async (req, res) => {
   try {
     const token = req.headers.authorization;
     user = updatePassword(token, req.body.oldPassword, req.body.newPassword, req.body.newPassword2);
@@ -105,7 +108,7 @@ app.post('/user/update_password', async (req, res) => {
   }
 });
 
-app.post('/user/refresh_token', async (req, res) => {
+app.post('rest/user/refresh_token', async (req, res) => {
   try {
     const token = getRefreshToken(req.body.refreshToken);
     console.log(req.body)
@@ -117,7 +120,7 @@ app.post('/user/refresh_token', async (req, res) => {
   }
 });
 
-app.get('/user/get_user', async (req, res) => {
+app.get('rest/user/get_user', async (req, res) => {
   try {
     const token = req.headers.authorization;
     const user = await getUser(token)
@@ -133,6 +136,7 @@ app.get('/user/get_user', async (req, res) => {
   }
 })
 
+// GOOGLE AUTHENTICATION
 app.post('/google/register', async (req, res) => {
   try {
     const user = await registerGoogleUser(req.body.user);
@@ -166,7 +170,18 @@ app.get('/config', (req, res) => {
   res.send({
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
   })
-})
+});
+
+app.get('/rest/fuels', async (req, res) => {
+  try {
+    const latitude = req.headers.latitude;
+    const longitude = req.headers.longitude;
+    const fuels = await fetchFuels(latitude, longitude);
+    res.status(200).json({ fuels: fuels });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.post('/create-payment-intent', async (req, res) => {
   try {

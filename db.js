@@ -4,11 +4,11 @@ require('dotenv').config();
 function connectToDatabase() {
   try {
     const connection = mariadb.createPool({
-      host: process.env.HOST,
-      port: process.env.DB_PORT,
-      user: process.env.USER,
-      password: process.env.PASSWORD,
-      database: process.env.DATABASE,
+      host: process.env.MARIADB_HOST,
+      port: process.env.MARIADB_DB_PORT,
+      user: process.env.MARIADB_USER,
+      password: process.env.MARIADB_PASSWORD,
+      database: process.env.MARIADB_DATABASE,
       connectionLimit: 5,
     });
 
