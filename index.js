@@ -177,6 +177,7 @@ app.get('/rest/fuels', async (req, res) => {
     const latitude = req.headers.latitude;
     const longitude = req.headers.longitude;
     const fuels = await fetchFuels(latitude, longitude);
+    console.log(fuels.slice(0, 5))
     res.status(200).json({ fuels: fuels });
   } catch (error) {
     res.status(500).json({ error: error.message });

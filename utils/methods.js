@@ -1,14 +1,13 @@
 function createFuelsData(fuelsData, fuelsWithBrandsData) {
-    for (let i = 0; i < fuelsWithBrandsData.length; i++) {
-        brandData = {
-            "Brand": fuelsWithBrandsData[i].Brand,
-            "Distance": fuelsWithBrandsData[i].Distance,
+    fuelsWithBrandsData.forEach((brandData, i) => {
+        fuelsData[i] = {
+            ...fuelsData[i],
+            Brand: brandData.Brand,
+            Distance: brandData.Distance
         };
-        fuelsData[i] = Object.assign(fuelsData[i], brandData);
-    }
+    });
     return fuelsData;
 }
-
 
 module.exports = {
     createFuelsData
