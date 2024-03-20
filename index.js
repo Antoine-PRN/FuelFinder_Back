@@ -177,8 +177,7 @@ app.get('/rest/fuels', async (req, res) => {
     const latitude = req.headers.latitude;
     const longitude = req.headers.longitude;
     const fuels = await fetchFuels(latitude, longitude);
-    console.log(fuels.slice(0, 5))
-    res.status(200).json({ fuels: fuels });
+    res.status(200).json(fuels);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -200,7 +199,9 @@ app.post('/create-payment-intent', async (req, res) => {
   }
 });
 
-
+app.get('/', (req, res) => {
+  res.send('Serveur backend de l\'application FuelFinder');
+});
 
 app.listen(process.env.PORT, () => {
   console.log(`Le serveur est en cours d'exécution sur le port ${process.env.PORT}`);
