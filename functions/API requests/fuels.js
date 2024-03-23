@@ -10,17 +10,19 @@ async function fetchFuels(latitude, longitude) {
         fuelsData.push(...response.fuelsData);
         fuelsWithBrandsData.push(...response.fuelsWithBrandsData);
 
-        const directions = ['lat', 'lon'];
+        await new Promise(resolve => setTimeout(resolve, 750));
 
         const maxObject = fuelsData.reduce((prev, curr) => curr.geom["lat"] > prev.geom["lat"] ? curr : prev);
         const maxResponse = await apiCalls(maxObject.geom.lat, maxObject.geom.lon);
         fuelsData.push(...maxResponse.fuelsData);
         fuelsWithBrandsData.push(...maxResponse.fuelsWithBrandsData);
 
-        const minObject = fuelsData.reduce((prev, curr) => curr.geom["lat"] < prev.geom["lat"] ? curr : prev);
-        const minResponse = await apiCalls(minObject.geom.lat, minObject.geom.lon);
-        fuelsData.push(...minResponse.fuelsData);
-        fuelsWithBrandsData.push(...minResponse.fuelsWithBrandsData);
+        // await new Promise(resolve => setTimeout(resolve, 750));
+
+        // const minObject = fuelsData.reduce((prev, curr) => curr.geom["lat"] < prev.geom["lat"] ? curr : prev);
+        // const minResponse = await apiCalls(minObject.geom.lat, minObject.geom.lon);
+        // fuelsData.push(...minResponse.fuelsData);
+        // fuelsWithBrandsData.push(...minResponse.fuelsWithBrandsData);
 
 
         return createFuelsData(fuelsData, fuelsWithBrandsData);
@@ -33,9 +35,19 @@ async function fetchFuels(latitude, longitude) {
 
 async function apiCalls(latitude, longitude) {
     try {
-        const response = await axios.get(`https://api.prix-carburants.2aaz.fr/stations/around/47.2150048,5.1718833?opendata=v2`);
+        const response = await axios.get(`https://api.prix-carburants.2aaz.fr/stations/around/${latitude},${longitude}?opendata=v2`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Range': 'station=1-20'
+            }
+        });
 
-        const responseBrands = await axios.get(`https://api.prix-carburants.2aaz.fr/stations/around/47.2150048,5.1718833?brands=1,2,66,136,28,42,12,26,49,19`);
+        const responseBrands = await axios.get(`https://api.prix-carburants.2aaz.fr/stations/around/${latitude},${longitude}?brands=1,2,66,136,28,42,12,26,49,19`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Range': 'station=1-20'
+            }
+        });
 
         // console.log(`https://api.prix-carburants.2aaz.fr/stations/around/${latitude},${longitude}`)
         const fuelsData = response.data;
